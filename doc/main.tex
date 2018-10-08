@@ -1,0 +1,293 @@
+%\documentclass[11pt]{article}
+\documentclass[fleqn]{article}
+\usepackage{geometry}
+\geometry{a4paper}                   		% ... or a4paper or a5paper or ... 
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{bm}
+\usepackage{cancel}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{float}
+\hypersetup{
+    colorlinks=true, % make the links colored
+    linkcolor=blue, % color TOC links in blue
+    urlcolor=red, % color URLs in red
+    citecolor=magenta,
+    linktoc=all % 'all' will create links for everything in the TOC
+}
+
+
+\newcommand{\clr}[2]{\color{#1} #2 \color{black}}
+\title{Spectral Analysis of finite difference method for convcetion-diffusion problems}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+Many physical phenomena are governed by the partial differential equations (PDEs) those model convection and/or diffusion processes. Presence of non-linear terms in such PDEs make the numerical analysis of their discrete models difficult. It is common to analyze numerical methods for a linear model problem, for example, linear convection or linear diffusion equation. Availability of exact solution and linearity of the equation enables one to quantify the performance of the numerical methods upto certain depth.
+
+In this report, we write the spectral analysis of finite difference methods by following the approaches in \cite{TKS_book, CH_book, JCP_2017}. The analysis written here is applicable to the following types of methods in the context in linear convection, diffusion and convection-diffusion equations:
+\begin{itemize}
+\item Explicit and implicit finite difference methods (for equi-spaced grids)
+\item Explicit and implicit time-integration methods
+\item Two and three level time-integration methods
+\end{itemize}
+This analysis identifies some quantities those determine the accuracy of the numerical method. A small code {\tt afd\_1d} is written in Fortran 90 that computes these quantities for some well known finite difference methods. However, any finite difference method that falls into above categories can be analyzed for its performance by easily modifying the code {\tt afd\_1d}.   
+
+
+\section{Spectral Analysis}
+\subsection{Model problem in 1D}
+For generality, we consider is the 1D linear covection-diffusion equation with infinite domain as a model problem for the analysis.
+\begin{equation}
+\frac{\partial u}{\partial t} + c \frac{\partial u}{\partial x} = \nu \frac{\partial^2 u}{\partial x^2} \hspace*{10mm} -\infty < x < \infty \\
+\label{1DCD}
+\end{equation}
+\begin{equation}
+u(x, t=0) = f_0(x)
+\label{IC}
+\end{equation}
+where, $c$ is the convection speed and $\nu$ ($> 0$) is the rate of diffusion. The analysis can be reduced to the convection and diffusion equations by taking $\nu = 0$ and $c = 0$ respectively.
+
+The dispersion relation for 1D advection-diffusion is obtained by substituting Fourier-Laplace transform $u(x, t) = \int \int \hat{U}(k, \omega) e^{i(kx -\omega t)} dk d\omega$ in Eq. \ref{1DCD}. 
+\begin{equation}
+\omega = k c - i \nu k^2
+\label{pdrp}
+\end{equation}
+
+Representing the variable $u$ by Fourier transform $u(x, t) = \int \hat{U}(k,t) e^{ikx} dk$, Eq. \ref{1DCD} and \ref{IC} can be written as
+\begin{equation*}
+\frac{d \hat{U}}{dt} + ick\hat{U} = - \nu k^2 \hat{U}
+\end{equation*}
+\begin{equation*}
+u(x, t=0) = \int \hat{U}_0(k) e^{ikx} dk
+\end{equation*}
+Above ordinary differential equation can be solved to obtain
+\begin{equation*}
+\hat{U}(k,t) = \hat{U}_0 e^{-ikct} e^{-\nu k^2 t} = \hat{U}_0 e^{-i \omega t} 
+\end{equation*}
+Physically, $e^{-ikct}$ propagates the initial condition with the speed $c$ and $e^{-\nu k^2 t}$ damps the initial condition at the rate $\nu$ (assuming $\nu > 0$) for each wavenumber $k$. The suitable numerical methods are expected to follow these two physical aspects. Spectral analysis of finite difference methods given in \cite{TKS_book, CH_book} provides the insight about how effectively finite differences follow these two aspects.
+
+\subsection{Finite difference methods}
+The spectral representation of the first and second derivatives can be written as:
+\begin{equation*}
+u' = \int_{-\infty}^{\infty} i k \hat{U} e^{i k x} dk
+\end{equation*} 
+\begin{equation*}
+u'' = - \int_{-\infty}^{\infty} k^2 \hat{U} e^{i k x} dk
+\end{equation*}
+Finite difference methods naturally arise from the Taylor series expansion. For higher resolution, implicit finite difference methods based on the Pad\'e's approximation are also widely used. Assuming that a 1D domain is discretized to obtain an equi-spaced grid of $N$ nodes, the numerical derivative $u'_j$ at any node can be written in terms of the discrete function $u_j$ as
+\begin{equation*}
+[A] \{u'_j\} = \frac{1}{h} [B]\{u_j\}
+\end{equation*}
+where entries of $[A]$ and $[B]$ comes from the coefficients of the finite difference method and $h$ denotes the grid-spacing. For explicit finite difference methods $[A]$ is an identity matrix. Inverting $[A]$,
+\begin{equation*}
+\{u'_j\} = \frac{1}{h} [C] \{u_j\}
+\end{equation*} 
+Alternatively
+\begin{equation*}
+u'_j = \frac{1}{h} \sum_{l=1}^{N} C_{jl} u_l 
+\end{equation*} 
+Again, by Fourier representation $u_l = \int \hat{U}(k) e^{(i k x_l)} dk$ and little algebra, we can write
+\begin{equation}
+u'_j = \frac{1}{h} \int \sum_{l=1}^{N} C_{jl} \hat{U} e^{ik(x_l - x_j)} e^{i k x_j} dk 
+\label{1st_der}
+\end{equation} 
+Similarly, a finite difference method for the second order derivative can be written as
+\begin{equation}
+u''_j = \frac{1}{h^2} \int \sum_{l=1}^{N} D_{jl} \hat{U} e^{ik(x_l - x_j)} e^{i k x_j} dk 
+\label{2nd_der}
+\end{equation}
+The similar representation can be written for the derivative of any order with appropriate finite difference method. We restrict here upto two derivatives on the account of the model problem considered.
+
+\subsection{Spectral analysis}
+Substituting Eq. \ref{1st_der} and \ref{2nd_der} in \ref{1DCD} and again using Fourier representation
+\begin{equation*}
+\int \Big[ \frac{\partial \hat{U}}{\partial t} + \frac{c}{h}C_{jl} \hat{U} e^{ik(x_l - x_j)} - \frac{\nu}{h^2}D_{jl} \hat{U} e^{ik(x_l - x_j)} \Big]  e^{i k x_j} dk  = 0
+\end{equation*}
+Since the integrand must be zero for any $k$,
+\begin{equation*}
+\frac{d \hat{U}}{d t} \bigg|_j = \bigg[ -\frac{c}{h}C_{jl}  e^{ik(x_l - x_j)} + \frac{\nu}{h^2}D_{jl}  e^{ik(x_l - x_j)} \bigg] \hat{U}
+\end{equation*}
+Using separation of variables,
+\begin{equation*}
+\frac{d \hat{U}}{\hat{U}} \bigg|_j = \bigg[ -\frac{c dt}{h}C_{jl}  e^{ik(x_l - x_j)} + \frac{\nu dt}{h^2}D_{jl}  e^{ik(x_l - x_j)} \bigg]
+\end{equation*}
+Here $\frac{c dt}{h}$ in the CFL number $Nc$ and $\frac{\nu dt}{h^2}$ is the Peclet number $Pe$. Hence
+\begin{equation}
+\frac{d \hat{U}}{\hat{U}} \bigg|_j = -\bigg[ Nc C_{jl}  e^{ik(x_l - x_j)} - Pe D_{jl}  e^{ik(x_l - x_j)} \bigg] = -A_j
+\label{main}
+\end{equation}
+In above equation, $A_j$ contains the information of finite difference approximations. For any choice of the time-integration method, above equation can be simplified to give amplification factor $G$ for the combination of the finite difference method for space derivatives and time integration method.
+
+\subsection{Amplification factors}
+The amplification factor is defined as the ratio of the amplitudes at two successive time levels.
+\begin{equation*}
+G = \frac{\hat{U}^{n+1}}{\hat{U}^n}
+\end{equation*}
+where superscript denotes the index for time discretization. Amplification factors for some well-known two and three level methods are written below.
+\subsubsection*{Explicit Euler Method}
+For Euler's forward method, Eq. \ref{main} becomes 
+\begin{equation*}
+\frac{\hat{U}^{n+1} - \hat{U}^n}{\hat{U}^n} = \frac{\hat{U}^{n+1}}{\hat{U}^n} - 1 = G_j - 1 = -A_j
+\end{equation*}
+Hence,
+\begin{equation*}
+G_j = 1 - A_j
+\end{equation*}
+The subscript $j$ is retained as this amplification factor is specific to the node $j$.
+
+\subsubsection*{Implicit Euler Method}
+\begin{equation*}
+G_j = \frac{1}{1 - A_j}
+\end{equation*}
+
+\subsubsection*{Classical Runge-Kutta second order method}
+\begin{equation*}
+G_j = 1 - A_j + \frac{A_j^2}{2}
+\end{equation*}
+
+\subsubsection*{Classical Runge-Kutta third order method}
+\begin{equation*}
+G_j = 1 - A_j + \frac{A_j^2}{2} - \frac{A_j^3}{6}
+\end{equation*}
+
+\subsubsection*{Classical Runge-Kutta forth order method}
+\begin{equation*}
+G_j = 1 - A_j + \frac{A_j^2}{2} - \frac{A_j^3}{6} + \frac{A_j^4}{24}
+\end{equation*}
+
+\subsubsection*{Crank-Nicholson Method}
+\begin{equation*}
+G_j = \frac{1+0.5Aj}{1 - 0.5A_j}
+\end{equation*}
+
+\subsubsection*{Richardson Method}
+\begin{equation*}
+G_j = A_j \pm \sqrt{A_j^2 + 1}
+\end{equation*}
+
+\subsubsection*{Gears or BDF2 Method}
+
+
+\subsection{Significance of the Amplification factor}
+The amplification factor acts as a numerical dispersion relation. Therefore, it governs the dynamics of the numerical solution. Let us consider the evolution of the solution through first time step i.e. from $t=0$ to $t=\Delta t$, which corresponds to the amplication factor $G_j^1$.
+\begin{equation*}
+u_j^1 = \int \hat{U}_0(k) G_j^1 e^{i k x_j} dk
+\end{equation*}
+Now using above numerical solution as an initial condition, we can write the evolution of the numerical solution through second time step i.e. from $t=\Delta t$ to $t=2\Delta t$, which corresponds to the amplication factor $G_j^2$. Therefore, the numerical solution at $t = 2\Delta t$ can be written as:
+\begin{equation*}
+u_j^2 = \int \hat{U}_0(k) G_j^1 G_j^2 e^{i k x_j} dk
+\end{equation*} 
+Therefore after $n$ time steps,
+\begin{equation*}
+u_j^n = \int \hat{U}_0(k) \Big[ \prod\limits_{m=1}^{n} G_j^m \Big] e^{i k x_j} dk
+\end{equation*} 
+Since the amplication factor is a complex quantity,
+\begin{equation*}
+u_j^n = \int \hat{U}_0(k) \Bigg[ \prod\limits_{m=1}^{n} |G_j^m| \Bigg] \Bigg[ \sum\limits_{m=1}^{n} e^{i \beta_j^m} \Bigg] e^{i k x_j} dk
+\end{equation*}
+where $\beta^m = \text{tan}^{-1}(G_{ji}^m/G_{jr}^m)$. The product term in above equation represents the cumulative numerical amplification/damping while the summation term represents the cumulative numerical phase speed. Each quantity in the product term can be modeled as the numerical amplification while each quantity in the summation term can be modeled as numerical phase speed. Therefore,
+\begin{equation*}
+u_j^n = \int \hat{U}_0(k) \Bigg[  e^{-k^2 \sum\limits_{m=1}^{n}(\nu_N^m \Delta t^m)} \Bigg] \Bigg[ e^{-i k \sum\limits_{m=1}^{n} (c_N^m \Delta t^m)} \Bigg] e^{i k x_j} dk
+\end{equation*}
+Assuming that the time-step is kept constant,
+\begin{equation*}
+u_j^n = \int \hat{U}_0(k) \Bigg[  e^{-k^2 \Delta t \sum\limits_{m=1}^{n}\nu_N^m} \Bigg] \Bigg[ e^{-i k \Delta t \sum\limits_{m=1}^{n} c_N^m} \Bigg] e^{i k x_j} dk
+\end{equation*}
+In the analogy with the physical dispersion relation, these two terms can be modeled as $e^{-\nu_N k^2 \Delta t}$ and $e^{-i k c_N \Delta t}$ respectively. Here, $\nu_N$ and $c_N$ represents the average damping and phase speed, respectively due to all the steps in the computations. In the ideal situation, $\Delta t \sum\limits_{m=1}^{n} \nu_N $ and $\Delta t \sum\limits_{m=1}^{n} c_N$ should be equal to their physical counterparts $\nu t$ and $c t$ respectively. If time-step is variable then, $\sum\limits_{m=1}^{n}(\nu_N \Delta t^m)$ and $\sum\limits_{m=1}^{n}(c_N \Delta t ^m)$ should be equal to their physical counterparts $\nu t$ and $c t$ respectively.  It should be noted that the each term $\nu_N^m$ and $c_N^m$ is the function of wavenumber $k$. For a constant time-step $\Delta t$ above equation can be written as: 
+\begin{equation}
+u_N = \int \hat{U}_0(k) e^{-\nu_N k^2 \Delta t} e^{-i k c_N \Delta t} e^{i k x} dk
+\label{num_sol}
+\end{equation}
+\section{Error Dynamics}
+Following the steps in \cite{TKS_book}, equation for the error dynamics of 1D convection-diffusion equation can be obtained. Let us define error $e$ as the difference between exact and numerical solution $u-u_N$. Therfore,
+\begin{equation}
+\frac{\partial e}{\partial t} + c \frac{\partial e}{\partial x} - \nu \frac{\partial^2 e}{\partial x^2} = -\frac{\partial u_N}{\partial t} - c \frac{\partial u_N}{\partial x} + \nu \frac{\partial^2 u_N}{\partial x^2} 
+\label{err_dyn}
+\end{equation}
+Taking first and second derivative of Eq. \ref{num_sol} w.r.t. $x$,
+\begin{equation*}
+\frac{d u_N}{dx} = i \int k \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk
+\end{equation*}
+\begin{equation*}
+\frac{d^2 u_N}{dx^2} = -\int k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk
+\end{equation*}
+Similarly, differentiating Eq. \ref{num_sol} w.r.t. $t$,\begin{equation*}
+\frac{d u_N}{dt} = \int -(\nu_N k^2 + i c_N k) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk
+\end{equation*}
+Substituting these derivatives in the Eq. \ref{err_dyn},
+\begin{align*}
+&\frac{\partial e}{\partial t} + c \frac{\partial e}{\partial x} - \nu \frac{\partial^2 e}{\partial x^2} \\
+& = \int (\nu_N k^2 + i c_N k) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - c \int ik \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& - \nu \int k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& = \int (\nu_N k^2 + i c_N k) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - \int (\nu k^2+ikc) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk 
+\end{align*}
+This equation highlights error does not follow the same dynamics as the underlying PDE, but has the source term which is a consequence of numerical dispersion relation which is different than physical dispersion relation. With some algebra, above equation can be further explored:
+\begin{align*}
+&\frac{\partial e}{\partial t} + c \frac{\partial e}{\partial x} - \nu \frac{\partial^2 e}{\partial x^2} \\
+& = \int (\nu_N k^2 + i c_N k) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - \int (\nu k^2+ikc) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& + \nu_N \int k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - \nu_N \int k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& + c_N \int i k \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - c_N \int i k \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& =  (\nu_N - \nu) \frac{\partial^2 u_N}{\partial x^2} + (c_N - c)  \frac{\partial u_N}{\partial x} + \int (\nu_N k^2 + i c_N k) \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& - \nu_N \int k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - c_N \int i k \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& =  (\nu_N - \nu) \frac{\partial^2 u_N}{\partial x^2} + (c_N - c)  \frac{\partial u_N}{\partial x} \\
+& + \int \nu_N k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - \nu_N \int k^2 \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+& + \int  i c_N k \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk - c_N \int i k \hat{U}_0(k) e^{-\nu_N k^2 t} e^{-i k c_N t} e^{i k x} dk \\
+\end{align*}
+Using integration by parts, the PDE for error dynamics can be written as
+\begin{align*}
+&\frac{\partial e}{\partial t} + c \frac{\partial e}{\partial x} - \nu \frac{\partial^2 e}{\partial x^2}  =  (\nu_N - \nu) \frac{\partial^2 u_N}{\partial x^2} + (c_N - c)  \frac{\partial u_N}{\partial x} \\
+& - \int \frac{d \nu_N}{dk} \Big[ \int k'^2  \hat{U}_0(k') e^{-\nu_N k'^2 t} e^{-i k' c_N t} e^{i k' x} dk' \Big] dk \\
+& - \int \frac{d c_N}{dk} \Big[ \int i k'  \hat{U}_0(k') e^{-\nu_N k'^2 t} e^{-i k' c_N t} e^{i k' x} dk' \Big] dk
+\end{align*}
+The source term contains:
+\begin{itemize}
+\item $(c_N - c)$: phase speed error, arises due to approximate modeling of the first derivative.
+\item $(\nu_N - \nu)$: diffusion error, arises due to approximate modeling of the second derivative.
+\item $\frac{d c_N}{dk}$ and $\frac{d \nu_N}{dk}$: dispersion error, arise due to approximate modeling of the PDE.  
+\end{itemize}
+
+In the continuum limit where $\nu_N = \nu$ and $c_N = c$, the source term in the equation of error dynamics vanish and we recover the von Neumann's prediction that the solution and computational error follows the same dynamics. For practical situations von Neumann's prediction may not hold. 
+
+\section{Numerical Properties}
+Since, expression of $G_j$ can be found from the choice of numerical scheme, amplification factor $|G_j|$, phase speed $\beta_j$ are readily available. Although all the information is contained in $G_j$, we consider following quantities as the numerical properties of the finite difference methods:
+\begin{itemize}
+\item When diffusion is present, numerical amplification factor $|G_j|$ should model physical amplification factor $G_{ex} = e^{-Pe (kh)^2}$. For convection problems $|G_j|$ should be equal to 1, since pure convection problem does not amplify or attenuate the solution.
+
+\item For the quantification of phase error, we choose to compute the quantity $\frac{c_N}{c} = \frac{\beta_j}{(kh)(Nc)}$ . Deviation of this quantity from 1 represent the phase error.
+
+\item For the quantification of diffusion error, we choose to compute the quantity $\frac{\nu_N}{\nu} = \frac{-log(|G|)}{(Pe)(kh)^2}$ . Deviation of this quantity from 1 represent the diffusion error i.e. solution is either over or under damped depending on whether this quantity if $> 1$ or $< 1$ respectively.
+
+\item For the quantification of the dispersion error, we choose to (numerically) differentiate $\frac{c_N}{c}$ and $\frac{\nu_N}{\nu}$ w.r.t. $k$. Their expressions are written as:
+\begin{equation*}
+\frac{d}{d(kh)} \bigg[\frac{c_N}{c}\bigg] = \frac{1}{(Nc)(kh)} \bigg[ \frac{d \beta_j}{d (kh)} - \frac{\beta}{(kh)} \bigg]
+\end{equation*}
+\begin{equation*}
+\frac{d}{d(kh)} \bigg[\frac{\nu_N}{\nu}\bigg] = \frac{-1}{(Pe)(kh)^2} \bigg[ \frac{d }{d (kh)} log|G_j| - 2\frac{log|G_j|}{(kh)} \bigg]
+\end{equation*}
+\end{itemize}
+
+\section{Description of the code:}
+To be written.
+
+\bibliographystyle{siam}
+\begin{thebibliography}{1}
+
+\bibitem{TKS_book}
+        {\sc T. K. Sengupta}, {\em High accuracy computing methods: fluid flows and wave phenomena}, Cambridge University Press, New York, USA (2013).
+
+\bibitem{CH_book}
+        {\sc Charles Hirsch}, {\em Numerical Computation of Internal and External Flows, Volume 1: Fundamentals of Numerical Discretization}, John Wiley \& Sons, Inc. New York, NY, USA (1988).
+
+\bibitem{JCP_2017}
+        {\sc V. K. Suman, T. K. Sengupta, C. Jyothi Durga Prasad, K. Surya Mohan and D. Sanwalia}, {\em Spectral analysis of finite difference schemes for convection diffusion equation}, Comput. Fluids, 150 (2017), pp.~95--114.     
+        
+\end{thebibliography}
+
+\end{document}  

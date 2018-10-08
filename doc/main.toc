@@ -1,0 +1,10 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}
+\contentsline {section}{\numberline {2}Spectral Analysis}{2}{section.2}
+\contentsline {subsection}{\numberline {2.1}Model problem in 1D}{2}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Finite difference methods}{3}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Spectral analysis}{4}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}Amplification factors}{4}{subsection.2.4}
+\contentsline {subsection}{\numberline {2.5}Significance of the Amplification factor}{5}{subsection.2.5}
+\contentsline {section}{\numberline {3}Error Dynamics}{6}{section.3}
+\contentsline {section}{\numberline {4}Numerical Properties}{8}{section.4}
+\contentsline {section}{\numberline {5}Description of the code:}{8}{section.5}

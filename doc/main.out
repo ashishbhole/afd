@@ -1,0 +1,10 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Spectral Analysis}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Model problem in 1D}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Finite difference methods}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Spectral analysis}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Amplification factors}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.5}{Significance of the Amplification factor}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{Error Dynamics}{}% 8
+\BOOKMARK [1][-]{section.4}{Numerical Properties}{}% 9
+\BOOKMARK [1][-]{section.5}{Description of the code:}{}% 10
