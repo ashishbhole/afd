@@ -274,7 +274,12 @@ Since, expression of $G_j$ can be found from the choice of numerical scheme, amp
 \end{itemize}
 
 \section{Description of the code:}
-To be written.
+\begin{itemize}
+\item Go to src directory and type {\tt make clean} to remove previous object and executable files.
+\item Then run the command {\tt make} to build the executable {\tt afd\_1d}.
+\item Edit {\tt input.in} to select the model problem and available finite-difference schemes. Finite-difference schemes need to added in the code if not available.
+\item Now run the code using command '{\tt ./afd\_1d input.in}'.
+\end{itemize}
 
 \bibliographystyle{siam}
 \begin{thebibliography}{1}
