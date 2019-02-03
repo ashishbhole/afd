@@ -281,6 +281,13 @@ Since, expression of $G_j$ can be found from the choice of numerical scheme, amp
 \item Now run the code using command '{\tt ./afd\_1d input.in}'.
 \end{itemize}
 
+In general, for a derivative of order $r$, a finite difference formula  can be written as:
+\begin{align*}
+\sum_{i=-nn}^{nn} a_{i} u_i^{r} = \sum_{i=-mm}^{mm} b_{i} u_i
+\end{align*}
+The coefficients $a_i$ and $b_i$ determine the formula. For first order derivative, these coefficients are stored in a variable {\tt ac} and {\tt bc} while for second order derivative they are {\tt ad} and {\tt bd}. Number of boundary stencils required depends upon the value {\tt mm}.
+
+
 \bibliographystyle{siam}
 \begin{thebibliography}{1}
 
@@ -292,6 +299,12 @@ Since, expression of $G_j$ can be found from the choice of numerical scheme, amp
 
 \bibitem{JCP_2017}
         {\sc V. K. Suman, T. K. Sengupta, C. Jyothi Durga Prasad, K. Surya Mohan and D. Sanwalia}, {\em Spectral analysis of finite difference schemes for convection diffusion equation}, Comput. Fluids, 150 (2017), pp.~95--114.     
+        
+\bibitem{Vichne_book}
+R.~Vichnevetsky and John B.~Bowles.
+\newblock {\em Fourier Analysis of Numerical Approximations of Hyperbolic Equations}.
+\newblock SIAM, Philadelphia 1982.
+
         
 \end{thebibliography}
 

@@ -1,0 +1,22 @@
+&input_list
+
+model = 'convection' ! convection, diffusion, convection-diffusion
+
+total_nodes = 51 ! total nodes used for the analysis
+node = 26        ! node for which properties are required
+
+first_derivative = 'LELE'   ! CD2, CD4, CD6, LELE
+second_derivative = 'LELE'  ! CD2, CD4, LELE
+
+time_integration_levels = 2  ! 2 or 3
+time_integration = 'RK4'
+
+! domain length of following variables
+Nc_max = 2.0
+Pe_max = 2.0
+
+! no of points in following domains
+NNc = 100
+NPe = 100
+
+/
