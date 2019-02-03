@@ -1,3 +1,6 @@
+module tools
+contains
+
 subroutine inverse(A, AI)
 use variables
 implicit none
@@ -73,3 +76,4 @@ real :: P1, T, AB, BIG
 
 End subroutine inverse
 
+end module tools
